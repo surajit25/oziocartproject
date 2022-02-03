@@ -1,0 +1,47 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: Roboto,Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img:hover{
+  cursor: pointer;
+}
+
+svg:hover{
+  cursor: pointer;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.cursor{
+  cursor: pointer;
+}
+
+.category{
+  min-height: 50vh;
+}
+
+.carousel-control-prev-icon, .carousel-control-next-icon {
+  height: 200px;
+  width: 200px;
+  outline: black;
+  background-color: black;
+  background-size: 100%, 100%;
+  border: 1px solid black;
+  color: black;
+}
+
+
+.mainfooter{
+  font-size: 13px;
+  cursor: pointer;
+}
