@@ -33,8 +33,8 @@ function Secondbanner(props){
     },[])
 
     const VisitPage=(product)=>{
-        console.log(product)
-        Router.push(`/product-category/`)
+       
+        Router.push({pathname:`/product-category/${props.category.replaceAll(" ","-").toLowerCase()}/${product.url}`})
     }
 
     return(

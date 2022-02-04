@@ -1,92 +1,117 @@
-import { CardMedia, Container, Paper, Typography } from "@mui/material";
-import Router  from "next/router";
-import React, { useState } from "react";
-
-import Carousel from 'react-multi-carousel';
-
-import { Box } from "@mui/system";
-
-const responsive = {
-    superLargeDesktop: {
-      // the naming can be any, depends on you.
-      breakpoint: { max: 4000, min: 3000 },
-      items: 5
-    },
-    desktop: {
-      breakpoint: { max: 3000, min: 1024 },
-      items: 3
-    },
-    tablet: {
-      breakpoint: { max: 1024, min: 464 },
-      items: 2
-    },
-    mobile: {
-      breakpoint: { max: 464, min: 0 },
-      items: 2
-    }
-  };
 
 
-export default function Trending(){
-    var img1="/clutches.jpeg"
-    var img2 = "/men.png"
-    var img3 = "/Light.jpeg"
-    var x =[{id:1,image:img1},{id:2,image:img2},{id:3,image:img3},{id:4,image:img2}]
+  import {  CardMedia, Container, Typography,Stack ,Box, Button} from "@mui/material";
+  import Router  from "next/router";
+  import React, { useEffect, useState } from "react";
+  
+  import Carousel from 'react-multi-carousel';
 
-    const [product,setProduct] = useState(x)
+  import Api from '../api/axioapi'
+import server from "../api/apilink";
+import { blueGrey } from "@mui/material/colors";
 
-    const VisitPage=(item)=>{
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 
-      Router.push(`/product/mens-wear/t-shirt`)
-    }
+  const responsive = {
+      superLargeDesktop: {
+        // the naming can be any, depends on you.
+        breakpoint: { max: 4000, min: 3000 },
+        items: 5
+      },
+      desktop: {
+        breakpoint: { max: 3000, min: 1024 },
+        items: 3
+      },
+      tablet: {
+        breakpoint: { max: 1024, min: 464 },
+        items: 2
+      },
+      mobile: {
+        breakpoint: { max: 464, min: 0 },
+        items: 2
+      }
+    };
+  
+  
+  export default function Trending(){
+  
+      const [product,setProduct] = useState([])
 
-    return(
-        <React.Fragment>
-
-            <Container>
-
-                <Typography  sx={{fontWeight:'600',textAlign:'center',mt:1}} >Trending Now</Typography>
-
-            <Carousel 
-            infinite
-             responsive={responsive}
-
+      useEffect(()=>{
+        
+        Api.post(`${server}/trendingproduct`).then(res=>{
+          
+          setProduct(res.data)
+        })
+      },[])
+  
+      const VisitPage=(item)=>{
+  
+        Router.push({pathname:`/product/${item.slug.toLowerCase()}`,query:{color:item.color,size:item.size}})
+      }
+  
+      return(
+          <React.Fragment>
+  
+              <Container>
+  
+                  <Typography  sx={{fontWeight:'600',textAlign:'center',mt:1}} >Trending Now</Typography>
+  
+              <Carousel infinite
+               responsive={responsive}
+               
              removeArrowOnDeviceType={['mobile']}
 
-
-             >
-
-               {product.map(item=>{
-                   return(
-                       <Box key={item} onClick={()=>VisitPage(item)} sx={{display:'flex',justifyContent:'center',flexDirection:'column',alignItems:"center",mx:1,mb:1}} >
-                         
-                           <CardMedia
-
-                           component={'img'}
-
-                           image = {item.image}
-
-                           sx={{width:'50%'}}
-
-                           />
-
-                           <Typography>
-                                   <small> This is decor{item.id}</small>
-                           </Typography>
+               >
+  
+                 {product.map(item=>{
+                     return(
+                         <Box key={item} onClick={()=>VisitPage(item)} sx={{mx:1,mb:1,bgcolor:"#f1f8e9"}} >
                            
-                       </Box>
-                   )
-               })}
-            
+                             <CardMedia
+  
+                             component={'img'}
+  
+                             image = {"https://oziocartimage.s3.amazonaws.com/media/"+item.proim1}
+  
+                             sx={{width:'100%'}}
+  
+                             />
 
-            </Carousel>
+                           
 
+                             <Stack sx={{p:2}} direction={'column'}>
 
+                            
 
-            </Container>
+                               <Box component="div" sx={{ textOverflow: 'ellipsis',whiteSpace:"nowrap",overflow:"hidden",fontWeight:"600",textTransform:"capitalize" }}>
+                               {item.name}
+                                </Box>
 
-         
-        </React.Fragment>
-    )
-}
+                               <Typography>{item.color} {item.size}</Typography>
+                               <Typography sx={{fontSize:"25px",fontWeight:"600"}}><CurrencyRupeeIcon sx={{fontSize:"18px"}} /> {item.sellingprice}</Typography>
+
+                             </Stack>
+
+                         
+                           
+                             
+                         </Box>
+                     )
+                 })}
+              
+  
+              </Carousel>
+  
+  
+  
+              </Container>
+  
+           
+          </React.Fragment>
+      )
+  }
+  
+  
+
 

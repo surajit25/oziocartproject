@@ -39,10 +39,10 @@ import { grey } from "@mui/material/colors";
 
 function ProductPage(props){
 
-    const [Product,setProduct] =useState([props.product])
+    const [Product,setProduct] =useState([])
     const [defaultsize,setDefaultsize]= useState()
     const [defaultcolor,setDefaultColor] = useState()
-    const [defaultimage,setDefaultimage] = useState(props.product[0].proim1)
+    const [defaultimage,setDefaultimage] = useState()
 
     const [ProductCommon,setProductCommon] = useState(props.common[0])
 
@@ -56,46 +56,48 @@ function ProductPage(props){
 
    
     useEffect(()=>{
-        
+ 
 
-        var product = Product[0]
-        var size = []
-        var color =[]
 
-        var tempsize = ''
 
-        if(router.query.color){
+        Api.post(`${server}/getproductbyslug`,{slug:props.slug}).then(res=>{
 
-            setDefaultColor(router.query.color)
+            setProduct(res.data)
 
-            setDefaultsize(router.query.size)
+            let product = res.data
+            let tempsize = ''
 
-            tempsize = router.query.size
+            if(router.query){
+                setDefaultColor(router.query.color)
+                setDefaultsize(router.query.size)
+                tempsize = router.query.size
 
-        }else{
-            setDefaultsize(props.product[0].size)
-            setDefaultColor(props.product[0].color)
-            
-            tempsize = props.product[0].size
-        }
-
-        
-
-        for(var i=0;i<product.length;i++){
-
-            if(size.indexOf(product[i].size)==-1){
-                size.push(product[i].size)
+            }else{
+                setDefaultColor(res.data[0].color)
+                setDefaultsize(res.data[0].size)
+                tempsize = res.data[0].size
             }
 
-            if(size.indexOf(product[i].color)==-1 && product[i].size==tempsize ){
-                color.push(product[i].color)
+            let color = []
+            let size = []
+
+            for(var i=0;i<res.data.length;i++){
+
+                    if(size.indexOf(res.data[i].size)==-1){
+                       size.push(res.data[i].size)
+                    }
+
+                    if(tempsize==res.data[i].size && color.indexOf(res.data[i].color)==-1){
+                        color.push(res.data[i].color)
+                    }
             }
 
-        }
-        
+            setColor(color)
+            setSize(size)
+            setDefaultimage(res.data[0].proim1)
 
-        setSize(size)
-        setColor(color)
+
+        })
 
 
     },[])
@@ -108,7 +110,7 @@ function ProductPage(props){
 
     const Changesize=(size)=>{
 
-        var product = Product[0]
+        var product = Product
         var color = []
 
       
@@ -248,7 +250,7 @@ function ProductPage(props){
                             
                             <Box sx={{width:'20%'}} >
                                     
-                                    {Product[0].map(item=>{
+                                    {Product.map(item=>{
         
                                             if(item.size==defaultsize&&item.color==defaultcolor){
                                             return(
@@ -346,7 +348,7 @@ function ProductPage(props){
                             </Paper>
 
                             <Box sx={{mt:1,display:{lg:"block",md:"none",sm:"none",xl:"block",xs:"none"}}}>
-                                    {Product[0].map(item=>{
+                                    {Product.map(item=>{
 
                                         if(item.stock && item.color==defaultcolor && item.size==defaultsize){
 
@@ -386,7 +388,7 @@ function ProductPage(props){
                          <Grid  item sm={12} md={12} lg={6} xl={6} xs={12}  >
 
                         <Box>
-                             {Product[0].map(item=>{
+                             {Product.map(item=>{
 
                                 if(item.size==defaultsize&&item.color==defaultcolor){
                             
@@ -639,7 +641,7 @@ function ProductPage(props){
      <Box sx={{display:{lg:'none',md:"block",xs:"block",sm:"block",xl:"none"},zIndex:"300"}} >
 
 <Paper sx={{position:'fixed',left:'0px',bottom:"0px",p:2,width:"100%",p:2}} >
-{Product[0].map(item=>{
+{Product.map(item=>{
 
     if(item.stock && item.color==defaultcolor && item.size==defaultsize){
 
@@ -677,24 +679,44 @@ function ProductPage(props){
 }
 
 
-export async function getStaticPaths() {
-    // Call an external API endpoint to get posts
-     const res = await Api.post(`${server}/allproductcommonsection`).then(res=>{return res.data})
+// export async function getStaticPaths() {
+//     // Call an external API endpoint to get posts
+//      const res = await Api.post(`${server}/allproductcommonsection`).then(res=>{return res.data})
 
-    // Get the paths we want to pre-render based on posts
+//     // Get the paths we want to pre-render based on posts
    
 
-    const paths =res.map((item) => ({
-      params: {slug:item.slug },
-    }))
+//     const paths =res.map((item) => ({
+//       params: {slug:item.slug },
+//     }))
   
-    // We'll pre-render only these paths at build time.
-    // { fallback: false } means other routes should 404.
-    return { paths, fallback: false }
-  }
+//     // We'll pre-render only these paths at build time.
+//     // { fallback: false } means other routes should 404.
+//     return { paths, fallback: false }
+//   }
   
   // This also gets called at build time
-  export async function getStaticProps({ params }) {
+
+
+//   export async function getStaticProps({ params }) {
+//     // params contains the post `id`.
+//     // If the route is like /posts/1, then params.id is 1
+//     // const res = await fetch(`https://.../posts/${params.id}`)
+//     // const post = await res.json()
+
+//     const {slug} = params
+
+//     // const res = await Api.post(`${server}/getproductbyslug`,{slug:slug}).then(res=>{return res.data})
+   
+//     const res2 = await Api.post(`${server}/productcommonsectionbyslug`,{slug:slug}).then(res=>{return res.data})
+    
+  
+//     // Pass post data to the page via props
+//     return { props: {common:res2,slug:slug } }
+//   }
+
+
+  export async function  getServerSideProps({ params }) {
     // params contains the post `id`.
     // If the route is like /posts/1, then params.id is 1
     // const res = await fetch(`https://.../posts/${params.id}`)
@@ -702,13 +724,13 @@ export async function getStaticPaths() {
 
     const {slug} = params
 
-    const res = await Api.post(`${server}/getproductbyslug`,{slug:slug}).then(res=>{return res.data})
+    // const res = await Api.post(`${server}/getproductbyslug`,{slug:slug}).then(res=>{return res.data})
    
     const res2 = await Api.post(`${server}/productcommonsectionbyslug`,{slug:slug}).then(res=>{return res.data})
     
   
     // Pass post data to the page via props
-    return { props: { product:res,common:res2 } }
+    return { props: {common:res2,slug:slug } }
   }
   
   

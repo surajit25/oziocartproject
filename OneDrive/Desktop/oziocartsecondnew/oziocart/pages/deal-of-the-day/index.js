@@ -1,13 +1,17 @@
 
 
-  import {  CardMedia, Container, Paper, Typography } from "@mui/material";
+  import {  CardMedia, Container, Typography,Stack ,Box, Button} from "@mui/material";
   import Router  from "next/router";
-  import React, { useState } from "react";
+  import React, { useEffect, useState } from "react";
   
   import Carousel from 'react-multi-carousel';
 
-  import { Box } from "@mui/system";
-  
+  import Api from '../api/axioapi'
+import server from "../api/apilink";
+import { blueGrey } from "@mui/material/colors";
+
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+
   const responsive = {
       superLargeDesktop: {
         // the naming can be any, depends on you.
@@ -30,16 +34,20 @@
   
   
   export default function DealOfDay(){
-      var img1="/clutches.jpeg"
-      var img2 = "/men.png"
-      var img3 = "/Light.jpeg"
-      var x =[{id:1,image:img1},{id:2,image:img2},{id:3,image:img3},{id:4,image:img2}]
   
-      const [product,setProduct] = useState(x)
+      const [product,setProduct] = useState([])
+
+      useEffect(()=>{
+        
+        Api.post(`${server}/dealoftheday`).then(res=>{
+          
+          setProduct(res.data)
+        })
+      },[])
   
       const VisitPage=(item)=>{
   
-        Router.push(`/product/mens-wear/t-shirt`)
+        Router.push({pathname:`/product/${item.slug.toLowerCase()}`,query:{color:item.color,size:item.size}})
       }
   
       return(
@@ -58,21 +66,35 @@
   
                  {product.map(item=>{
                      return(
-                         <Box key={item} onClick={()=>VisitPage(item)} sx={{display:'flex',justifyContent:'center',flexDirection:'column',alignItems:"center",mx:1,mb:1}} >
+                         <Box key={item} onClick={()=>VisitPage(item)} sx={{mx:1,mb:1,bgcolor:"#f1f8e9"}} >
                            
                              <CardMedia
   
                              component={'img'}
   
-                             image = {item.image}
+                             image = {"https://oziocartimage.s3.amazonaws.com/media/"+item.proim1}
   
-                             sx={{width:'50%'}}
+                             sx={{width:'100%'}}
   
                              />
-  
-                             <Typography>
-                                     <small> This is decor{item.id}</small>
-                             </Typography>
+
+                           
+
+                             <Stack sx={{p:2}} direction={'column'}>
+
+                            
+
+                               <Box component="div" sx={{ textOverflow: 'ellipsis',whiteSpace:"nowrap",overflow:"hidden",fontWeight:"600",textTransform:"capitalize" }}>
+                               {item.name}
+                                </Box>
+
+                               <Typography>{item.color} {item.size}</Typography>
+                               <Typography sx={{fontSize:"25px",fontWeight:"600"}}><CurrencyRupeeIcon sx={{fontSize:"18px"}} /> {item.sellingprice}</Typography>
+
+                             </Stack>
+
+                         
+                           
                              
                          </Box>
                      )
